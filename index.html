@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ATEMIUS: Core - v13.9.4</title>
+    <title>ATEMIUS: Core - v13.5.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * {
@@ -19,7 +19,7 @@
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             width: 100vw;
-            height: 100dvh;
+            height: 100vh;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -722,11 +722,10 @@
         .atemius-core .ac-ring.r3 { width: 58%;  height: 58%;  border-color: rgba(0,229,255,0.28); animation: ac-rot 16s linear infinite; }
         .atemius-core .ac-ring.r4 { width: 42%;  height: 42%;  border: 1px dotted rgba(127,255,212,0.35); animation: ac-rot 10s linear infinite reverse; }
         .atemius-core .ac-ring.r5 { width: 90%;  height: 90%;  border-color: rgba(0,180,220,0.10); animation: ac-rot 60s linear infinite reverse; }
-        .atemius-core.reactive .ac-ring.r1 { animation-duration: 18s; border-color: rgba(0,229,255,0.28); }
-        .atemius-core.reactive .ac-ring.r2 { animation-duration: 12s; border-color: rgba(127,255,212,0.4); }
-        .atemius-core.reactive .ac-ring.r3 { animation-duration: 8s;  border-color: rgba(0,229,255,0.5); }
-        .atemius-core.reactive .ac-ring.r4 { animation-duration: 5s; }
-        .atemius-core .ac-ring { transition: border-color 0.4s ease, animation-duration 0.4s ease; }
+        .atemius-core.reactive .ac-ring.r1 { border-color: rgba(0,229,255,0.28); }
+        .atemius-core.reactive .ac-ring.r2 { border-color: rgba(127,255,212,0.4); }
+        .atemius-core.reactive .ac-ring.r3 { border-color: rgba(0,229,255,0.5); }
+        .atemius-core .ac-ring { transition: border-color 0.4s ease; }
 
         @keyframes ac-rot {
             from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -793,9 +792,7 @@
             98%           { filter: brightness(0.88); }
             99%           { filter: brightness(1.15); }
         }
-        .atemius-core.reactive .ac-core { animation-duration: 2.2s, 7s; }
-
-        /* Halo glow behind the sphere */
+        
         .atemius-core .ac-halo {
             position: absolute;
             top: 50%; left: 50%;
@@ -821,9 +818,6 @@
         .atemius-core .ac-orbit.o1 { width: 50%; height: 50%; animation: ac-rot 9s linear infinite; }
         .atemius-core .ac-orbit.o2 { width: 68%; height: 68%; animation: ac-rot 14s linear infinite reverse; }
         .atemius-core .ac-orbit.o3 { width: 86%; height: 86%; animation: ac-rot 22s linear infinite; }
-        .atemius-core.reactive .ac-orbit.o1 { animation-duration: 4.5s; }
-        .atemius-core.reactive .ac-orbit.o2 { animation-duration: 7s; }
-        .atemius-core.reactive .ac-orbit.o3 { animation-duration: 11s; }
 
         .atemius-core .ac-particle {
             position: absolute;
@@ -3486,7 +3480,7 @@
             applyShieldBtnStyle();
 
             function initControlsTabUI() {
-                const isMob = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                const isMob = deviceHasTouch;
                 const pcSec = document.getElementById('ctrlPcSection');
                 const mobSec = document.getElementById('ctrlMobileSection');
                 if (pcSec)  pcSec.style.display  = isMob ? 'none' : 'block';
