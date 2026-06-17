@@ -632,6 +632,39 @@
         }
         ::-webkit-scrollbar-thumb:hover { background: rgba(0,255,231,0.5); }
 
+        /* ── Controls Tab: key-bind buttons ── */
+        .key-bind-btn {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: rgba(5, 10, 25, 0.85);
+            border: 1px solid rgba(0, 255, 231, 0.3);
+            color: #00e5ff;
+            cursor: pointer;
+            min-width: 72px;
+            text-align: center;
+            transition: all 0.15s;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            outline: none;
+        }
+        .key-bind-btn:hover {
+            border-color: rgba(0, 255, 231, 0.65);
+            box-shadow: 0 0 10px rgba(0, 255, 231, 0.2);
+        }
+        .key-bind-btn.listening {
+            border-color: #fbbf24 !important;
+            color: #fbbf24 !important;
+            background: rgba(251, 191, 36, 0.1) !important;
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.35) !important;
+            animation: pulse-border 0.9s ease-in-out infinite;
+        }
+        #settingsTabControls .bg-slate-900\/60 {
+            border-left: 2px solid rgba(0,255,231,0.25) !important;
+            background: rgba(5,10,25,0.75) !important;
+        }
+
         /* ═══════════════════════════════════════════════
            ATEMIUS HOLOGRAPHIC CORE — menu centerpiece
            Lightweight CSS-only reactor: concentric rings,
@@ -1128,6 +1161,7 @@
                 <!-- Navigation Tabs -->
                 <div class="flex gap-2 border-b border-slate-900 pb-3 mb-4 text-xs font-mono">
                     <button id="tabAudioLangBtn" class="px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold">GENERAL</button>
+                    <button id="tabControlsBtn" class="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200">CONTROLS</button>
                     <button id="tabAdminLoginBtn" class="hidden">ADMIN LOGIN</button>
                     <button id="tabAdminPanelBtn" class="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-500 cursor-not-allowed hidden">ADMIN PANEL</button>
                 </div>
@@ -1201,6 +1235,98 @@
                             </button>
                             <div id="adminLoginFeedback" class="text-xs font-bold text-center mt-2 min-h-[1.25rem]"></div>
                         </div>
+                    </div>
+
+                    <!-- TAB: CONTROLS -->
+                    <div id="settingsTabControls" class="space-y-5 hidden">
+
+                        <!-- PC: Keyboard Bindings -->
+                        <div id="ctrlPcSection" class="space-y-4">
+                            <div class="bg-slate-900/60 p-4 border border-slate-800 rounded space-y-4">
+                                <h3 class="text-xs font-bold text-cyan-400 tracking-widest uppercase border-b border-slate-800 pb-1.5" style="font-family:'Orbitron',sans-serif;">Keyboard Bindings</h3>
+                                <p class="text-[10px] text-slate-500 font-mono">Click a key to rebind it, then press the new key. <span class="text-amber-400">[ESC]</span> cancels.</p>
+
+                                <div class="grid grid-cols-1 gap-2 text-xs font-mono">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Move Up</span>
+                                        <button class="key-bind-btn" data-action="moveUp" id="kbMoveUp">W</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Move Down</span>
+                                        <button class="key-bind-btn" data-action="moveDown" id="kbMoveDown">S</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Move Left</span>
+                                        <button class="key-bind-btn" data-action="moveLeft" id="kbMoveLeft">A</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Move Right</span>
+                                        <button class="key-bind-btn" data-action="moveRight" id="kbMoveRight">D</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Shield</span>
+                                        <button class="key-bind-btn" data-action="shield" id="kbShield">X</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Start / Skip</span>
+                                        <button class="key-bind-btn" data-action="startGame" id="kbStartGame">SPACE</button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-slate-300">Pause</span>
+                                        <button class="key-bind-btn" data-action="pause" id="kbPause">ESCAPE</button>
+                                    </div>
+                                </div>
+
+                                <button id="kbResetBtn" class="btn-primary px-3 py-1.5 w-full bg-slate-900 border border-slate-700 text-slate-400 hover:text-slate-200 font-bold text-[10px] rounded tracking-wider mt-1">RESET TO DEFAULTS</button>
+                            </div>
+                        </div>
+
+                        <!-- Mobile: Shield Button Settings -->
+                        <div id="ctrlMobileSection" class="space-y-4">
+                            <div class="bg-slate-900/60 p-4 border border-slate-800 rounded space-y-4">
+                                <h3 class="text-xs font-bold text-cyan-400 tracking-widest uppercase border-b border-slate-800 pb-1.5" style="font-family:'Orbitron',sans-serif;">Shield Button</h3>
+
+                                <!-- Size -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-mono text-slate-400">
+                                        <span>Button Size</span>
+                                        <span id="shieldSizeVal" class="text-cyan-400 font-bold">68px</span>
+                                    </div>
+                                    <input type="range" id="shieldSizeSlider" min="50" max="120" value="68" class="vol-slider" style="--val:32%">
+                                </div>
+
+                                <!-- Position presets -->
+                                <div class="space-y-1">
+                                    <span class="text-xs font-mono text-slate-400">Position</span>
+                                    <div class="grid grid-cols-3 gap-1.5 mt-1">
+                                        <button data-pos="bottom-left"   id="shieldPosLeft"   class="shield-pos-btn key-bind-btn text-[10px]">BOTTOM-LEFT</button>
+                                        <button data-pos="bottom-center" id="shieldPosCenter" class="shield-pos-btn key-bind-btn text-[10px]">BOTTOM-CENTER</button>
+                                        <button data-pos="bottom-right"  id="shieldPosRight"  class="shield-pos-btn key-bind-btn text-[10px]">BOTTOM-RIGHT</button>
+                                    </div>
+                                </div>
+
+                                <!-- Bottom & Side offset -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs font-mono text-slate-400">
+                                            <span>Bottom Offset</span>
+                                            <span id="shieldOffsetBVal" class="text-cyan-400 font-bold">24px</span>
+                                        </div>
+                                        <input type="range" id="shieldOffsetB" min="8" max="80" value="24" class="vol-slider" style="--val:21%">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between text-xs font-mono text-slate-400">
+                                            <span>Side Offset</span>
+                                            <span id="shieldOffsetSVal" class="text-cyan-400 font-bold">24px</span>
+                                        </div>
+                                        <input type="range" id="shieldOffsetS" min="8" max="80" value="24" class="vol-slider" style="--val:21%">
+                                    </div>
+                                </div>
+
+                                <button id="shieldBtnReset" class="btn-primary px-3 py-1.5 w-full bg-slate-900 border border-slate-700 text-slate-400 hover:text-slate-200 font-bold text-[10px] rounded tracking-wider">RESET SHIELD BUTTON</button>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- TAB 3: ADMIN PANEL (Controls) -->
@@ -3258,6 +3384,245 @@
             const settingsTabAudioLang = document.getElementById('settingsTabAudioLang');
             const settingsTabAdminLogin = document.getElementById('settingsTabAdminLogin');
             const settingsTabAdminPanel = document.getElementById('settingsTabAdminPanel');
+            const tabControlsBtn = document.getElementById('tabControlsBtn');
+            const settingsTabControls = document.getElementById('settingsTabControls');
+
+            // ── Controls Config ──────────────────────────────────────────────
+            const DEFAULT_CONTROLS = {
+                moveUp:    ' w',
+                moveDown:  ' s',
+                moveLeft:  ' a',
+                moveRight: ' d',
+                shield:    ' x',
+                startGame: ' ',
+                pause:     'escape'
+            };
+            // strip leading space marker used to distinguish from empty string
+            function rawKey(k) { return k.startsWith(' ') ? k.slice(1) : k; }
+            function storeKey(k) { return k === ' ' ? ' ' : ' ' + k; }
+
+            let controlsConfig = Object.assign({}, DEFAULT_CONTROLS);
+
+            function loadControlsConfig() {
+                try {
+                    const saved = localStorage.getItem('atemius_controls');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        controlsConfig = Object.assign({}, DEFAULT_CONTROLS, parsed);
+                    }
+                } catch(e) {}
+            }
+            function saveControlsConfig() {
+                try { localStorage.setItem('atemius_controls', JSON.stringify(controlsConfig)); } catch(e) {}
+            }
+            loadControlsConfig();
+
+            function keyLabel(stored) {
+                const k = rawKey(stored);
+                if (k === ' ') return 'SPACE';
+                if (k === 'escape') return 'ESCAPE';
+                if (k === 'arrowup') return '↑';
+                if (k === 'arrowdown') return '↓';
+                if (k === 'arrowleft') return '←';
+                if (k === 'arrowright') return '→';
+                return k.toUpperCase();
+            }
+
+            function refreshKeyLabels() {
+                const map = {
+                    moveUp: 'kbMoveUp', moveDown: 'kbMoveDown',
+                    moveLeft: 'kbMoveLeft', moveRight: 'kbMoveRight',
+                    shield: 'kbShield', startGame: 'kbStartGame', pause: 'kbPause'
+                };
+                for (const [action, elId] of Object.entries(map)) {
+                    const el = document.getElementById(elId);
+                    if (el) el.textContent = keyLabel(controlsConfig[action]);
+                }
+                // Update shield PC-box label
+                const pcKey = document.getElementById('pcShieldKey');
+                if (pcKey) pcKey.textContent = `[${keyLabel(controlsConfig.shield)}] SHIELD`;
+            }
+
+            // Mobile shield button position/size config
+            const DEFAULT_SHIELD_BTN = { size: 68, position: 'bottom-left', offsetB: 24, offsetS: 24 };
+            let shieldBtnConfig = Object.assign({}, DEFAULT_SHIELD_BTN);
+
+            function loadShieldBtnConfig() {
+                try {
+                    const saved = localStorage.getItem('atemius_shieldbtn');
+                    if (saved) shieldBtnConfig = Object.assign({}, DEFAULT_SHIELD_BTN, JSON.parse(saved));
+                } catch(e) {}
+            }
+            function saveShieldBtnConfig() {
+                try { localStorage.setItem('atemius_shieldbtn', JSON.stringify(shieldBtnConfig)); } catch(e) {}
+            }
+            loadShieldBtnConfig();
+
+            // Apply persisted key labels after DOM is ready (deferred)
+            setTimeout(() => { refreshKeyLabels(); applyShieldBtnStyle(); }, 0);
+
+            function applyShieldBtnStyle() {
+                const container = document.getElementById('mobileShieldContainer');
+                const btn = document.getElementById('shieldButton');
+                if (!container || !btn) return;
+                const s = shieldBtnConfig;
+                btn.style.width  = s.size + 'px';
+                btn.style.height = s.size + 'px';
+                // Reset all position
+                container.style.bottom = s.offsetB + 'px';
+                container.style.top    = '';
+                container.style.left   = '';
+                container.style.right  = '';
+                container.style.transform = '';
+                if (s.position === 'bottom-left') {
+                    container.style.left = s.offsetS + 'px';
+                } else if (s.position === 'bottom-right') {
+                    container.style.right = s.offsetS + 'px';
+                } else if (s.position === 'bottom-center') {
+                    container.style.left = '50%';
+                    container.style.transform = 'translateX(-50%)';
+                }
+            }
+            applyShieldBtnStyle();
+
+            function initControlsTabUI() {
+                const isMob = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                const pcSec = document.getElementById('ctrlPcSection');
+                const mobSec = document.getElementById('ctrlMobileSection');
+                if (pcSec)  pcSec.style.display  = isMob ? 'none' : 'block';
+                if (mobSec) mobSec.style.display  = isMob ? 'block' : 'none';
+
+                refreshKeyLabels();
+
+                // Populate mobile sliders
+                const sizeSlider = document.getElementById('shieldSizeSlider');
+                const sizeVal    = document.getElementById('shieldSizeVal');
+                const offBSlider = document.getElementById('shieldOffsetB');
+                const offBVal    = document.getElementById('shieldOffsetBVal');
+                const offSSlider = document.getElementById('shieldOffsetS');
+                const offSVal    = document.getElementById('shieldOffsetSVal');
+
+                if (sizeSlider) {
+                    sizeSlider.value = shieldBtnConfig.size;
+                    sizeSlider.style.setProperty('--val', Math.round((shieldBtnConfig.size - 50) / 70 * 100) + '%');
+                    if (sizeVal) sizeVal.textContent = shieldBtnConfig.size + 'px';
+                    sizeSlider.oninput = function() {
+                        shieldBtnConfig.size = parseInt(this.value);
+                        this.style.setProperty('--val', Math.round((this.value - 50) / 70 * 100) + '%');
+                        if (sizeVal) sizeVal.textContent = this.value + 'px';
+                        applyShieldBtnStyle();
+                    };
+                }
+                if (offBSlider) {
+                    offBSlider.value = shieldBtnConfig.offsetB;
+                    offBSlider.style.setProperty('--val', Math.round((shieldBtnConfig.offsetB - 8) / 72 * 100) + '%');
+                    if (offBVal) offBVal.textContent = shieldBtnConfig.offsetB + 'px';
+                    offBSlider.oninput = function() {
+                        shieldBtnConfig.offsetB = parseInt(this.value);
+                        this.style.setProperty('--val', Math.round((this.value - 8) / 72 * 100) + '%');
+                        if (offBVal) offBVal.textContent = this.value + 'px';
+                        applyShieldBtnStyle();
+                    };
+                }
+                if (offSSlider) {
+                    offSSlider.value = shieldBtnConfig.offsetS;
+                    offSSlider.style.setProperty('--val', Math.round((shieldBtnConfig.offsetS - 8) / 72 * 100) + '%');
+                    if (offSVal) offSVal.textContent = shieldBtnConfig.offsetS + 'px';
+                    offSSlider.oninput = function() {
+                        shieldBtnConfig.offsetS = parseInt(this.value);
+                        this.style.setProperty('--val', Math.round((this.value - 8) / 72 * 100) + '%');
+                        if (offSVal) offSVal.textContent = this.value + 'px';
+                        applyShieldBtnStyle();
+                    };
+                }
+
+                // Position preset buttons
+                document.querySelectorAll('.shield-pos-btn').forEach(btn => {
+                    btn.style.borderColor = btn.dataset.pos === shieldBtnConfig.position
+                        ? 'rgba(0,255,231,0.6)' : 'rgba(0,255,231,0.3)';
+                    btn.onclick = function() {
+                        shieldBtnConfig.position = this.dataset.pos;
+                        document.querySelectorAll('.shield-pos-btn').forEach(b => {
+                            b.style.borderColor = 'rgba(0,255,231,0.3)';
+                        });
+                        this.style.borderColor = 'rgba(0,255,231,0.6)';
+                        applyShieldBtnStyle();
+                    };
+                });
+
+                // Reset shield button
+                const shReset = document.getElementById('shieldBtnReset');
+                if (shReset) shReset.onclick = function() {
+                    shieldBtnConfig = Object.assign({}, DEFAULT_SHIELD_BTN);
+                    applyShieldBtnStyle();
+                    initControlsTabUI();
+                };
+
+                // Key rebinding
+                let listeningBtn = null;
+                let listeningAction = null;
+
+                function stopListening() {
+                    if (listeningBtn) {
+                        listeningBtn.classList.remove('listening');
+                        listeningBtn.textContent = keyLabel(controlsConfig[listeningAction]);
+                    }
+                    listeningBtn = null;
+                    listeningAction = null;
+                }
+
+                document.querySelectorAll('.key-bind-btn[data-action]').forEach(btn => {
+                    btn.onclick = function(e) {
+                        e.stopPropagation();
+                        if (listeningBtn === this) { stopListening(); return; }
+                        stopListening();
+                        listeningBtn = this;
+                        listeningAction = this.dataset.action;
+                        this.classList.add('listening');
+                        this.textContent = '...';
+                    };
+                });
+
+                function onRebindKey(e) {
+                    if (!listeningBtn) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const k = e.key.toLowerCase();
+                    if (k === 'escape') { stopListening(); return; }
+                    // Prevent duplicate bindings (except for arrow keys which can share)
+                    const isArrow = ['arrowup','arrowdown','arrowleft','arrowright'].includes(k);
+                    if (!isArrow) {
+                        for (const [act, stored] of Object.entries(controlsConfig)) {
+                            if (act !== listeningAction && rawKey(stored) === k) {
+                                listeningBtn.classList.remove('listening');
+                                listeningBtn.textContent = '⚠ IN USE';
+                                setTimeout(() => {
+                                    if (listeningBtn) listeningBtn.textContent = keyLabel(controlsConfig[listeningAction]);
+                                    stopListening();
+                                }, 900);
+                                listeningBtn = null; listeningAction = null;
+                                return;
+                            }
+                        }
+                    }
+                    controlsConfig[listeningAction] = storeKey(k);
+                    stopListening();
+                    refreshKeyLabels();
+                }
+
+                // Remove old listener if any, add fresh one
+                settingsTabControls._rebindHandler && window.removeEventListener('keydown', settingsTabControls._rebindHandler, true);
+                settingsTabControls._rebindHandler = onRebindKey;
+                window.addEventListener('keydown', onRebindKey, true);
+
+                // KB reset button
+                const kbReset = document.getElementById('kbResetBtn');
+                if (kbReset) kbReset.onclick = function() {
+                    controlsConfig = Object.assign({}, DEFAULT_CONTROLS);
+                    stopListening();
+                    refreshKeyLabels();
+                };
+            }
 
             // Language system — DE/EN hardcoded, others via Google Translate
 
@@ -3623,9 +3988,12 @@
             applyTranslations();
 
             function showSettingsTab(tab) {
-                tabAudioLangBtn.className = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200";
-                tabAdminLoginBtn.className = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200";
-                tabAdminPanelBtn.className = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200";
+                const inactiveClass = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200";
+                const activeClass   = "px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold";
+                tabAudioLangBtn.className = inactiveClass;
+                tabAdminLoginBtn.className = inactiveClass;
+                tabAdminPanelBtn.className = inactiveClass;
+                tabControlsBtn.className  = inactiveClass;
                 
                 const isAdminUnlocked = adminLoggedIn || !!window.adminLoggedIn;
                 if (!isAdminUnlocked) {
@@ -3637,20 +4005,26 @@
                 settingsTabAudioLang.classList.add('hidden');
                 settingsTabAdminLogin.classList.add('hidden');
                 settingsTabAdminPanel.classList.add('hidden');
+                settingsTabControls.classList.add('hidden');
 
                 if (tab === 'audio') {
-                    tabAudioLangBtn.className = "px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold";
+                    tabAudioLangBtn.className = activeClass;
                     settingsTabAudioLang.classList.remove('hidden');
+                } else if (tab === 'controls') {
+                    tabControlsBtn.className = activeClass;
+                    settingsTabControls.classList.remove('hidden');
+                    initControlsTabUI();
                 } else if (tab === 'login') {
-                    tabAdminLoginBtn.className = "px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold";
+                    tabAdminLoginBtn.className = activeClass;
                     settingsTabAdminLogin.classList.remove('hidden');
                 } else if (tab === 'panel') {
-                    tabAdminPanelBtn.className = "px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold";
+                    tabAdminPanelBtn.className = activeClass;
                     settingsTabAdminPanel.classList.remove('hidden');
                 }
             }
 
             tabAudioLangBtn.addEventListener('click', () => showSettingsTab('audio'));
+            tabControlsBtn.addEventListener('click', () => showSettingsTab('controls'));
             tabAdminLoginBtn.addEventListener('click', () => showSettingsTab('login'));
             tabAdminPanelBtn.addEventListener('click', () => {
                 if (adminLoggedIn || window.adminLoggedIn) showSettingsTab('panel');
@@ -3858,13 +4232,21 @@
 
             // Also wire escape key to toggle pause
             window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && gameActive) {
+                const kLow = e.key.toLowerCase();
+                const pauseKey = rawKey(controlsConfig.pause);
+                if (kLow === pauseKey && gameActive) {
                     if (pauseScreen.classList.contains('active')) {
                         closePauseMenu();
                     } else if (!settingsScreen.classList.contains('active')
                                && !upgradeScreen.classList.contains('active')) {
                         openPauseMenu();
                     }
+                }
+                // Space / configured start key: start game from start screen
+                const startKey = rawKey(controlsConfig.startGame);
+                if ((kLow === startKey || e.key === ' ') && !gameActive && startScreen.classList.contains('active')) {
+                    e.preventDefault();
+                    sfx.init(); sfx.setBgm('game'); startGame();
                 }
             });
             // ──────────────────────────────────────────────────────────
@@ -3912,6 +4294,11 @@
                         spawnRate = adminSpawnInterval;
                     }
                 }
+
+                // Save controls and shield button config
+                saveControlsConfig();
+                saveShieldBtnConfig();
+                refreshKeyLabels();
 
                 settingsScreen.classList.remove('active');
                 sfx.playUpgradeSelect();
@@ -3980,15 +4367,22 @@
                 mobileShieldContainer.classList.add('hidden'); 
                 
                 const key = e.key.toLowerCase();
-                keys[key] = true; 
-                if (key === 'x') {
+                keys[key] = true;
+
+                const shieldKey = rawKey(controlsConfig.shield);
+                if (key === shieldKey) {
                     activatePlayerShield();
                 }
                 
                 // Track keypresses for controls calibration in V12.9.1 tutorial
                 if (inTutorial && tutStep === 1) {
-                    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
-                        tutPlayerMovedAmount += 12; // simulated ticks of successful calibration
+                    const moveKeys = [
+                        rawKey(controlsConfig.moveUp), rawKey(controlsConfig.moveDown),
+                        rawKey(controlsConfig.moveLeft), rawKey(controlsConfig.moveRight),
+                        'arrowup', 'arrowdown', 'arrowleft', 'arrowright'
+                    ];
+                    if (moveKeys.includes(key)) {
+                        tutPlayerMovedAmount += 12;
                     }
                 }
             });
@@ -5264,7 +5658,9 @@
 
                         const keyXDom = document.getElementById('keyShield');
                         if (keyXDom) {
-                            if (keys['x']) {
+                            const sk = rawKey(controlsConfig.shield);
+                            keyXDom.textContent = '[' + keyLabel(controlsConfig.shield) + '] SHIELD';
+                            if (keys[sk]) {
                                 keyXDom.className = "px-2 py-1 rounded border border-amber-500 bg-amber-950/40 text-amber-300 shadow-[0_0_8px_rgba(255,214,10,0.4)] ml-3";
                             } else {
                                 keyXDom.className = "px-2 py-1 rounded border border-slate-700 bg-slate-900 text-slate-500 ml-3";
@@ -5335,10 +5731,10 @@
                 let dx = 0;
                 let dy = 0;
 
-                if (keys['w'] || keys['arrowup']) dy -= 1;
-                if (keys['s'] || keys['arrowdown']) dy += 1; 
-                if (keys['a'] || keys['arrowleft']) dx -= 1;
-                if (keys['d'] || keys['arrowright']) dx += 1;
+                if (keys[rawKey(controlsConfig.moveUp)]    || keys['arrowup'])    dy -= 1;
+                if (keys[rawKey(controlsConfig.moveDown)]  || keys['arrowdown'])  dy += 1;
+                if (keys[rawKey(controlsConfig.moveLeft)]  || keys['arrowleft'])  dx -= 1;
+                if (keys[rawKey(controlsConfig.moveRight)] || keys['arrowright']) dx += 1;
 
                 if (touchStartPos && touchCurPos) {
                     dx = touchCurPos.x - touchStartPos.x;
