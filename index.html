@@ -4673,6 +4673,8 @@
             document.getElementById('timeSpeedX2').addEventListener('click', () => setTimeMultiplier(2));
             document.getElementById('timeSpeedX3').addEventListener('click', () => setTimeMultiplier(3));
 
+            let settingsOpenedFromPause = false;
+
             function openSettings() {
                 isPaused = true;
                 settingsScreen.classList.add('active');
@@ -4708,6 +4710,7 @@
 
             document.getElementById('pauseSettingsButton').addEventListener('click', () => {
                 pauseScreen.classList.remove('active');
+                settingsOpenedFromPause = true;
                 openSettings();
                 showSettingsTab('audio');
             });
@@ -4795,8 +4798,13 @@
 
                 settingsScreen.classList.remove('active');
                 sfx.playUIBack();
-                
-                if (!upgradeScreen.classList.contains('active') && !tutorialScreen.classList.contains('active')) {
+
+                if (settingsOpenedFromPause) {
+                    settingsOpenedFromPause = false;
+                    if (!upgradeScreen.classList.contains('active') && !tutorialScreen.classList.contains('active')) {
+                        pauseScreen.classList.add('active');
+                    }
+                } else if (!upgradeScreen.classList.contains('active') && !tutorialScreen.classList.contains('active')) {
                     // If game is active and we came from the pause menu flow, stay paused
                     isPaused = false;
                 }
@@ -4838,7 +4846,10 @@
 
             closeSettingsButton.addEventListener('click', closeAndSaveSettings);
             saveSettingsBtn.addEventListener('click', closeAndSaveSettings);
-            startSettingsButton.addEventListener('click', openSettings);
+            startSettingsButton.addEventListener('click', () => {
+                settingsOpenedFromPause = false;
+                openSettings();
+            });
 
             function showShieldButton() {
                 if (deviceHasTouch) {
