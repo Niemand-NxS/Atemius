@@ -6,7 +6,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<<<<<<< Updated upstream
     <title>ATEMIUS: Core - v13.10.1</title>
+=======
+    <title>ATEMIUS: Core - v13.5.1</title>
+>>>>>>> Stashed changes
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * {
@@ -591,6 +595,20 @@
         #upgradeScreen .bg-slate-950\/80 {
             background: rgba(4,8,22,0.9) !important;
             border-color: rgba(0,255,231,0.18) !important;
+        }
+
+        /* V13.10: Upgrade-Inhalt blendet erst NACH der Level-Up-Animation ein;
+           der Hintergrund von #upgradeScreen selbst ist sofort sichtbar (via .menu-overlay.active) */
+        #upgradeContentWrap {
+            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            transform: translateY(14px) scale(0.97);
+            pointer-events: none;
+        }
+        #upgradeContentWrap.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
         }
 
         /* ── Language buttons ── */
@@ -1477,7 +1495,7 @@
             <div style="position:absolute;bottom:12px;left:12px;width:22px;height:22px;border-bottom:2px solid rgba(0,255,231,0.4);border-left:2px solid rgba(0,255,231,0.4);"></div>
             <div style="position:absolute;bottom:12px;right:12px;width:22px;height:22px;border-bottom:2px solid rgba(0,255,231,0.4);border-right:2px solid rgba(0,255,231,0.4);"></div>
 
-            <div class="w-full max-w-3xl flex flex-col items-center relative z-10">
+            <div id="upgradeContentWrap" class="w-full max-w-3xl flex flex-col items-center relative z-10">
                 <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px; width:100%;">
                     <div style="height:1px;flex-grow:1;max-width:120px;background:linear-gradient(90deg,transparent,var(--cyan));"></div>
                     <span id="upgradeSystemModText" style="font-size:10px;letter-spacing:5px;color:var(--cyan-dim);">SYSTEM MODIFICATION</span>
@@ -3807,6 +3825,7 @@
             const killDisplay = document.getElementById('killDisplay');
             const startScreen = document.getElementById('startScreen');
             const upgradeScreen = document.getElementById('upgradeScreen');
+            const upgradeContentWrap = document.getElementById('upgradeContentWrap');
             const upgradeOptions = document.getElementById('upgradeOptions');
             const gameOverScreen = document.getElementById('gameOverScreen');
             const finalTime = document.getElementById('finalTime');
@@ -4174,6 +4193,7 @@
             let lastBossWaveTime = 0;
             const BOSS_WAVE_INTERVAL = 8000; 
             const MAX_NORMAL_ENEMIES_DURING_BOSS = 12; 
+            const MAX_ENEMIES_MOBILE = 30; // V13.10.4: Gegner-Limit auf Mobilgeräten
 
             let lastTime = 0;
             let gameStartTime = 0;
@@ -4967,7 +4987,7 @@
                     }
                     
                     if (player.shield.pulseDamage > 0) {
-                        const pulseRange = 160;
+                        const pulseRange = player.stats.magnetRange + 100; // V13.10.3: wächst zusammen mit dem Magnetfeld
                         enemies.forEach(e => {
                             const d = Math.hypot(e.x - player.x, e.y - player.y);
                             if (d < pulseRange) {
@@ -5678,6 +5698,14 @@
             function showUpgradeScreen() {
                 isPaused = true;
                 joyContainer.classList.add('hidden');
+
+                // V13.10: Inhalt (Stats/History/Optionen) zunächst verborgen halten —
+                // der Hintergrund von #upgradeScreen erscheint sofort, die Auswahl erst
+                // nachdem die Level-Up-Animation durchgelaufen ist.
+                if (upgradeContentWrap) {
+                    upgradeContentWrap.classList.remove('show');
+                    clearTimeout(upgradeContentWrap._revealTimer);
+                }
                 
                 statMaxHp.textContent = player.maxHp + " HP";
                 statDmg.textContent = adminInstaKill ? "INSTA-KILL" : player.stats.damage;
@@ -5748,6 +5776,14 @@
                 });
 
                 upgradeScreen.classList.add('active');
+
+                // V13.10: Upgrades erst einfaden, wenn die Level-Up-Animation
+                // (#levelUpOverlay, ~1.7s) so gut wie ausgelaufen ist.
+                if (upgradeContentWrap) {
+                    upgradeContentWrap._revealTimer = setTimeout(() => {
+                        upgradeContentWrap.classList.add('show');
+                    }, 1300);
+                }
 
                 // Mobile System Status Overlay
                 (function() {
@@ -5880,6 +5916,9 @@
 
 
             function spawnSingleEnemy() {
+                // V13.10.4: Gegner-Limit auf Mobilgeräten zur Performance-Optimierung
+                if (isMobile && enemies.length >= MAX_ENEMIES_MOBILE) return;
+
                 const angle = Math.random() * Math.PI * 2;
                 const spawnDist = Math.max(300, Math.max(canvas.width, canvas.height) * 0.6);
                 const ex = player.x + Math.cos(angle) * spawnDist;
@@ -6139,6 +6178,13 @@
                     }
                     boss.lastAttackTime = now;
                 }
+            }
+
+            // V13.10.4: Gegner bewegen sich direkt zum Spieler (kein Wand-Wrap-Around).
+            function vecToPlayer(e) {
+                const dx = player.x - e.x;
+                const dy = player.y - e.y;
+                return { dx, dy, dist: Math.hypot(dx, dy), angle: Math.atan2(dy, dx) };
             }
 
             function update(now, dt) {
@@ -6482,11 +6528,11 @@
                             e.x += Math.cos(ang) * e.speed * dt;
                             e.y += Math.sin(ang) * e.speed * dt;
                         }
-                        // V13.3.0: Wrap-around für Tutorial-Gegner
-                        if (e.x < -e.radius) e.x = canvas.width + e.radius;
-                        else if (e.x > canvas.width + e.radius) e.x = -e.radius;
-                        if (e.y < -e.radius) e.y = canvas.height + e.radius;
-                        else if (e.y > canvas.height + e.radius) e.y = -e.radius;
+                        // V13.10.4: Gegner bleiben im Spielfeld (kein Warp durch Wände)
+                        if (e.x < e.radius) { e.x = e.radius; }
+                        else if (e.x > canvas.width - e.radius) { e.x = canvas.width - e.radius; }
+                        if (e.y < e.radius) { e.y = e.radius; }
+                        else if (e.y > canvas.height - e.radius) { e.y = canvas.height - e.radius; }
 
                         // Contact damage to player
                         const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
@@ -6809,10 +6855,10 @@
                             if (now - e.lastDashTime > 1000) {
                                 e.isDashing = true;
                                 e.dashEndTime = now + 400; 
-                                const targetAngle = Math.atan2(player.y - e.y, player.x - e.x);
+                                const v = vecToPlayer(e);
                                 const dashForce = 7.5; 
-                                e.dashVx = Math.cos(targetAngle) * dashForce;
-                                e.dashVy = Math.sin(targetAngle) * dashForce;
+                                e.dashVx = Math.cos(v.angle) * dashForce;
+                                e.dashVy = Math.sin(v.angle) * dashForce;
 
                                 for(let g=0; g<8; g++) {
                                     particles.push({
@@ -6829,23 +6875,23 @@
                     }
 
                     if (e.type !== 'dasher' && !(e.type === 'lancer' && e.lancerCharging)) {
-                        const angle = Math.atan2(player.y - e.y, player.x - e.x);
-                        e.x += Math.cos(angle) * e.speed * dt;
-                        e.y += Math.sin(angle) * e.speed * dt;
+                        const v = vecToPlayer(e);
+                        e.x += Math.cos(v.angle) * e.speed * dt;
+                        e.y += Math.sin(v.angle) * e.speed * dt;
                     }
 
-                    // V13.3.0: Wrap-around für Hauptspiel-Gegner
+                    // V13.10.4: Gegner bleiben im Spielfeld (kein Warp durch Wände)
                     if (e.type !== 'boss') {
-                        if (e.x < -e.radius) e.x = canvas.width + e.radius;
-                        else if (e.x > canvas.width + e.radius) e.x = -e.radius;
-                        if (e.y < -e.radius) e.y = canvas.height + e.radius;
-                        else if (e.y > canvas.height + e.radius) e.y = -e.radius;
+                        if (e.x < e.radius) { e.x = e.radius; }
+                        else if (e.x > canvas.width - e.radius) { e.x = canvas.width - e.radius; }
+                        if (e.y < e.radius) { e.y = e.radius; }
+                        else if (e.y > canvas.height - e.radius) { e.y = canvas.height - e.radius; }
                     }
 
                     // V12.12: Lancer â charges a beam, then fires a piercing laser
                     if (e.type === 'lancer') {
                         if (!e.lancerCooldown) e.lancerCooldown = now;
-                        const distToP = Math.hypot(player.x - e.x, player.y - e.y);
+                        const distToP = vecToPlayer(e).dist;
                         if (!e.lancerCharging && now - e.lancerCooldown > 3200 && distToP < 350) {
                             e.lancerCharging = true;
                             e.lancerChargeStart = now;
@@ -6902,7 +6948,7 @@
 
                     // V12.12: Kamikaze â explodes when close to player, kills nearby enemies too
                     if (e.type === 'kamikaze' && e.kamikazeArmed) {
-                        const distK = Math.hypot(player.x - e.x, player.y - e.y);
+                        const distK = vecToPlayer(e).dist;
                         if (distK < player.radius + e.radius + 18) {
                             e.kamikazeArmed = false;
                             const blastR = 70;
@@ -6941,7 +6987,7 @@
                         bossHpPercent.textContent = `${Math.ceil(bossHpPct)}%`;
                     }
 
-                    const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
+                    const distToPlayer = vecToPlayer(e).dist;
                     if(distToPlayer < player.radius + e.radius) {
                         if (player.shield.active) {
                             if (Math.random() < 0.1) {
@@ -6999,6 +7045,32 @@
                         }
 
                         enemies.splice(i, 1);
+                    }
+                }
+
+                // V13.10.3: Gegner sollen sich nicht überlappen/stapeln können — sanft auseinanderschieben
+                for (let i = 0; i < enemies.length; i++) {
+                    const e1 = enemies[i];
+                    if (e1.type === 'boss') continue;
+                    for (let j = i + 1; j < enemies.length; j++) {
+                        const e2 = enemies[j];
+                        if (e2.type === 'boss') continue;
+                        const dx = e2.x - e1.x;
+                        const dy = e2.y - e1.y;
+                        const minDist = e1.radius + e2.radius;
+                        const distSq = dx * dx + dy * dy;
+                        if (distSq >= minDist * minDist) continue;
+                        if (distSq > 0.0001) {
+                            const dist = Math.sqrt(distSq);
+                            const overlap = (minDist - dist) * 0.5;
+                            const nx = dx / dist, ny = dy / dist;
+                            e1.x -= nx * overlap; e1.y -= ny * overlap;
+                            e2.x += nx * overlap; e2.y += ny * overlap;
+                        } else {
+                            const ang = Math.random() * Math.PI * 2;
+                            e1.x -= Math.cos(ang) * 0.5; e1.y -= Math.sin(ang) * 0.5;
+                            e2.x += Math.cos(ang) * 0.5; e2.y += Math.sin(ang) * 0.5;
+                        }
                     }
                 }
 
