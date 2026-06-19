@@ -6,11 +6,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<<<<<<< Updated upstream
-    <title>ATEMIUS: Core - v13.10.1</title>
-=======
     <title>ATEMIUS: Core - v13.5.1</title>
->>>>>>> Stashed changes
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * {
@@ -641,6 +637,16 @@
             transform: scale(1.03);
         }
 
+        /* ── RESET button: same design, red ── */
+        #adminResetBtn {
+            box-shadow: 0 0 12px rgba(248,113,113,0.25);
+            transition: all 0.2s;
+        }
+        #adminResetBtn:hover {
+            box-shadow: 0 0 24px rgba(248,113,113,0.45), 0 0 6px rgba(248,113,113,0.2) inset;
+            transform: scale(1.03);
+        }
+
         /* ── Scrollbar: match accent ── */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
@@ -1126,7 +1132,7 @@
             <div style="text-align:center;max-width:480px;position:relative;z-index:1;">
                 <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;">
                     <div style="height:1px;width:40px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.6));"></div>
-                    <span id="startScreenVersion" style="font-size:10px;letter-spacing:5px;color:rgba(0,229,255,0.5);">SYSTEM v13.10.1</span>
+                    <span id="startScreenVersion" style="font-size:10px;letter-spacing:5px;color:rgba(0,229,255,0.5);">SYSTEM v13.4.0</span>
                     <div style="height:1px;width:40px;background:linear-gradient(270deg,transparent,rgba(0,229,255,0.6));"></div>
                 </div>
 
@@ -1472,7 +1478,8 @@
                 </div>
 
                 <!-- Settings Footer / Save button -->
-                <div class="border-t border-slate-800 pt-3 mt-3 flex justify-end">
+                <div class="border-t border-slate-800 pt-3 mt-3 flex justify-end gap-3">
+                    <button id="adminResetBtn" class="hidden btn-primary px-5 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-bold rounded text-xs tracking-wider uppercase">RESET</button>
                     <button id="saveSettingsBtn" class="btn-primary px-5 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold rounded text-xs tracking-wider uppercase">SAVE & CLOSE</button>
                 </div>
 
@@ -2526,6 +2533,7 @@
                 toStartScreenBtn: "ZUM STARTBILDSCHIRM",
                 settingsTitle: "EINSTELLUNGEN",
                 saveSettingsBtn: "SPEICHERN & SCHLIESSEN",
+                adminResetBtn: "ZURÜCKSETZEN",
                 audioHeader: "Audio-Einstellungen",
                 soundOptionLabel: "Soundeffekte & Feedback:",
                 languageHeader: "Sprachauswahl",
@@ -2722,6 +2730,7 @@
                 toStartScreenBtn: "RETURN TO MENU",
                 settingsTitle: "SETTINGS",
                 saveSettingsBtn: "SAVE & CLOSE",
+                adminResetBtn: "RESET",
                 audioHeader: "Audio Settings",
                 soundOptionLabel: "Sound Effects & Feedback:",
                 languageHeader: "Language Selection",
@@ -4321,6 +4330,8 @@
 
                 document.getElementById('settingsTitle').textContent = dict.settingsTitle;
                 saveSettingsBtn.textContent = dict.saveSettingsBtn;
+                const adminResetBtnEl = document.getElementById('adminResetBtn');
+                if (adminResetBtnEl) adminResetBtnEl.textContent = dict.adminResetBtn || (currentLang === 'de' ? "ZURÜCKSETZEN" : "RESET");
                 document.getElementById('audioHeader').textContent = dict.audioHeader;
                 document.getElementById('languageHeader').textContent = dict.languageHeader;
                 document.getElementById('adminTip').textContent = dict.adminTip;
@@ -4498,6 +4509,82 @@
 
             applyTranslations();
 
+            // V13.10.5: Original-Werte für den Admin-Panel Reset-Button
+            const ORIGINAL_ADMIN_DEFAULTS = {
+                startLevel: 1, spawnInterval: 1200, invulnerable: false, instaKill: false, timeMultiplier: 1,
+                stats: { maxHp: 100, damage: 25, speed: 3.5, fireRate: 450, bulletCount: 1, bulletSpeed: 7, magnetRange: 60, pierce: 1, ricochet: 0, regenRate: 0, shieldCd: 12000, shieldImp: 0 }
+            };
+
+            // V13.10.5: Befüllt das Admin-Panel mit den aktuell aktiven Werten.
+            // Läuft eine Runde, werden die LIVE-Werte des Spielers gezeigt (inkl. bereits
+            // im Spiel gewählter Upgrades) – sonst die gespeicherten Start-Werte.
+            function populateAdminPanelInputs() {
+                document.getElementById('adminStartLvlInput').value = adminStartLevel;
+                document.getElementById('adminSpawnRateInput').value = adminSpawnInterval;
+                document.getElementById('adminInvulCheckbox').checked = adminInvulnerable;
+                document.getElementById('adminInstaKillCheckbox').checked = adminInstaKill;
+
+                const live = gameActive ? {
+                    maxHp: player.maxHp,
+                    damage: player.stats.damage,
+                    speed: player.speed,
+                    fireRate: player.stats.fireRate,
+                    bulletCount: player.stats.bulletCount,
+                    bulletSpeed: player.stats.bulletSpeed,
+                    magnetRange: player.stats.magnetRange,
+                    pierce: player.stats.pierce,
+                    ricochet: player.stats.ricochet,
+                    regenRate: player.stats.regenRate,
+                    shieldCd: player.shield.cooldown,
+                    shieldImp: player.shield.pulseDamage
+                } : defaultStartingStats;
+
+                document.getElementById('perkMaxHp').value = live.maxHp;
+                document.getElementById('perkDmg').value = live.damage;
+                document.getElementById('perkSpeed').value = live.speed;
+                document.getElementById('perkFireRate').value = live.fireRate;
+                document.getElementById('perkBulletCount').value = live.bulletCount;
+                document.getElementById('perkBulletSpeed').value = live.bulletSpeed;
+                document.getElementById('perkMagnet').value = live.magnetRange;
+                document.getElementById('perkPierce').value = live.pierce;
+                document.getElementById('perkRicochet').value = live.ricochet;
+                document.getElementById('perkRegen').value = live.regenRate;
+                document.getElementById('perkShieldCd').value = live.shieldCd;
+                document.getElementById('perkShieldImp').value = live.shieldImp;
+            }
+
+            // V13.10.5: Setzt alle Admin-Panel Werte (global + Start-Perks) auf die Originalwerte zurück
+            function resetAdminPanel() {
+                adminStartLevel = ORIGINAL_ADMIN_DEFAULTS.startLevel;
+                adminSpawnInterval = ORIGINAL_ADMIN_DEFAULTS.spawnInterval;
+                adminInvulnerable = ORIGINAL_ADMIN_DEFAULTS.invulnerable;
+                adminInstaKill = ORIGINAL_ADMIN_DEFAULTS.instaKill;
+                Object.assign(defaultStartingStats, ORIGINAL_ADMIN_DEFAULTS.stats);
+                setTimeMultiplier(ORIGINAL_ADMIN_DEFAULTS.timeMultiplier);
+
+                if (gameActive) {
+                    const oldMaxHp = player.maxHp;
+                    player.maxHp = defaultStartingStats.maxHp;
+                    player.hp = Math.min(player.maxHp, player.hp + (player.maxHp - oldMaxHp));
+                    player.speed = defaultStartingStats.speed;
+                    player.stats.damage = defaultStartingStats.damage;
+                    player.stats.fireRate = defaultStartingStats.fireRate;
+                    player.stats.bulletCount = defaultStartingStats.bulletCount;
+                    player.stats.bulletSpeed = defaultStartingStats.bulletSpeed;
+                    player.stats.magnetRange = defaultStartingStats.magnetRange;
+                    player.stats.pierce = defaultStartingStats.pierce;
+                    player.stats.ricochet = defaultStartingStats.ricochet;
+                    player.stats.regenRate = defaultStartingStats.regenRate;
+                    player.shield.cooldown = defaultStartingStats.shieldCd;
+                    player.shield.pulseDamage = defaultStartingStats.shieldImp;
+                    spawnRate = adminSpawnInterval;
+                }
+
+                populateAdminPanelInputs();
+                sfx.playUIClick();
+            }
+            document.getElementById('adminResetBtn').addEventListener('click', resetAdminPanel);
+
             function showSettingsTab(tab) {
                 const inactiveClass = "px-3 py-1.5 rounded bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200";
                 const activeClass   = "px-3 py-1.5 rounded bg-cyan-950/50 border border-cyan-500/40 text-cyan-400 font-bold";
@@ -4531,7 +4618,11 @@
                 } else if (tab === 'panel') {
                     tabAdminPanelBtn.className = activeClass;
                     settingsTabAdminPanel.classList.remove('hidden');
+                    populateAdminPanelInputs();
                 }
+
+                const adminResetBtnEl = document.getElementById('adminResetBtn');
+                if (adminResetBtnEl) adminResetBtnEl.classList.toggle('hidden', tab !== 'panel');
             }
 
             tabAudioLangBtn.addEventListener('click', () => { sfx.playUIClick(); showSettingsTab('audio'); });
@@ -4767,8 +4858,8 @@
             });
             // ──────────────────────────────────────────────────────────
 
-            function closeAndSaveSettings() {
-                if (adminLoggedIn || window.adminLoggedIn) {
+            function closeAndSaveSettings(applyAdminChanges = true) {
+                if (applyAdminChanges && (adminLoggedIn || window.adminLoggedIn)) {
                     adminStartLevel = parseInt(document.getElementById('adminStartLvlInput').value) || 1;
                     adminSpawnInterval = parseInt(document.getElementById('adminSpawnRateInput').value) || 1200;
                     adminInvulnerable = document.getElementById('adminInvulCheckbox').checked;
@@ -4781,7 +4872,7 @@
                     defaultStartingStats.bulletCount = parseInt(document.getElementById('perkBulletCount').value) || 1;
                     defaultStartingStats.bulletSpeed = parseInt(document.getElementById('perkBulletSpeed').value) || 7;
                     defaultStartingStats.magnetRange = parseInt(document.getElementById('perkMagnet').value) || 60;
-                    defaultStartingStats.blockDepth = parseInt(document.getElementById('perkPierce').value) || 1;
+                    defaultStartingStats.pierce = parseInt(document.getElementById('perkPierce').value) || 1;
                     defaultStartingStats.ricochet = parseInt(document.getElementById('perkRicochet').value) || 0;
                     defaultStartingStats.regenRate = parseInt(document.getElementById('perkRegen').value) || 0;
                     defaultStartingStats.shieldCd = parseInt(document.getElementById('perkShieldCd').value) || 12000;
@@ -4864,8 +4955,8 @@
                 }
             };
 
-            closeSettingsButton.addEventListener('click', closeAndSaveSettings);
-            saveSettingsBtn.addEventListener('click', closeAndSaveSettings);
+            closeSettingsButton.addEventListener('click', () => closeAndSaveSettings(false));
+            saveSettingsBtn.addEventListener('click', () => closeAndSaveSettings(true));
             startSettingsButton.addEventListener('click', () => {
                 settingsOpenedFromPause = false;
                 openSettings();
